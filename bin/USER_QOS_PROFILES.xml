@@ -96,6 +96,14 @@ RTI Connext user manual.
                 <subscription_name>
                     <name>pr1DataReader</name>
                 </subscription_name>
+				<!--
+                <time_based_filter>
+                    <minimum_separation>
+                        <sec>1</sec>
+                        <nanosec>0</nanosec>
+                    </minimum_separation>
+                </time_based_filter>
+				--> 
             </datareader_qos>
             <participant_qos>
                 <!--

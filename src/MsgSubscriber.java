@@ -66,6 +66,35 @@ public class MsgSubscriber {
     // Public Methods
     // -----------------------------------------------------------------------
 
+	static class Counter { //class to keep track of how many times the listener gets called and to store the timestamp of the last processed message.
+		private int count;
+		private double oldTimeStamp; 
+		
+		public Counter() { //default constructor initializes counter to 0. 
+			count = 0;
+			oldTimeStamp = 0.0;
+		}
+		
+		public int incrementCount() {
+			return count++; //returns the current count and increments by one.
+		}
+		
+		public int getCount() {
+			return count;
+		}
+		
+		//check if there is 1 second between the timestamps
+		public boolean isLongerThanSecond(double timeToCheck) {
+			if ((timeToCheck - oldTimeStamp) > (double)1) {
+				oldTimeStamp = timeToCheck; //update old time
+				return true;
+			}				
+			return false;
+		}
+	}
+	
+    static Counter msgCounter = new Counter();
+	
     public static void main(String[] args) {
         // --- Get domain ID --- //
         int domainId = 0;
@@ -131,9 +160,7 @@ public class MsgSubscriber {
             /* To customize subscriber QoS, use
             the configuration file USER_QOS_PROFILES.xml */
 
-            subscriber = participant.create_subscriber(
-                DomainParticipant.SUBSCRIBER_QOS_DEFAULT, null /* listener */,
-                StatusKind.STATUS_MASK_NONE);
+            subscriber = participant.create_subscriber(DomainParticipant.SUBSCRIBER_QOS_DEFAULT, null /* listener */, StatusKind.STATUS_MASK_NONE);
             if (subscriber == null) {
                 System.err.println("create_subscriber error\n");
                 return;
@@ -148,10 +175,7 @@ public class MsgSubscriber {
             /* To customize topic QoS, use
             the configuration file USER_QOS_PROFILES.xml */
 
-            topic = participant.create_topic(
-                "Example Msg",
-                typeName, DomainParticipant.TOPIC_QOS_DEFAULT,
-                null /* listener */, StatusKind.STATUS_MASK_NONE);
+            topic = participant.create_topic("CS464 Project  1 Isaac Schultz", typeName, DomainParticipant.TOPIC_QOS_DEFAULT, null /* listener */, StatusKind.STATUS_MASK_NONE);
             if (topic == null) {
                 System.err.println("create_topic error\n");
                 return;
@@ -159,15 +183,12 @@ public class MsgSubscriber {
 
             // --- Create reader --- //
 
-            listener = new MsgListener();
+            listener = new MsgListener();            
 
             /* To customize data reader QoS, use
             the configuration file USER_QOS_PROFILES.xml */
 
-            reader = (MsgDataReader)
-            subscriber.create_datareader(
-                topic, Subscriber.DATAREADER_QOS_DEFAULT, listener,
-                StatusKind.STATUS_MASK_ALL);
+            reader = (MsgDataReader)subscriber.create_datareader(topic, Subscriber.DATAREADER_QOS_DEFAULT, listener, StatusKind.STATUS_MASK_ALL);
             if (reader == null) {
                 System.err.println("create_datareader error\n");
                 return;
@@ -175,13 +196,11 @@ public class MsgSubscriber {
 
             // --- Wait for data --- //
 
-            final long receivePeriodSec = 4;
+            final long receivePeriodSec = 1; // only check to recieve every 4 seconds.
+            
 
-            for (int count = 0;
-            (sampleCount == 0) || (count < sampleCount);
-            ++count) {
-                System.out.println("Msg subscriber sleeping for "
-                + receivePeriodSec + " sec...");
+            for (int count = 0; (sampleCount == 0) || (count < sampleCount); ++count) {
+                System.out.println("Msg subscriber sleeping for " + receivePeriodSec + " sec...");
 
                 try {
                     Thread.sleep(receivePeriodSec * 1000);  // in millisec
@@ -221,9 +240,7 @@ public class MsgSubscriber {
         SampleInfoSeq _infoSeq = new SampleInfoSeq();
 
         public void on_data_available(DataReader reader) {
-            MsgDataReader MsgReader =
-            (MsgDataReader)reader;
-
+            MsgDataReader MsgReader = (MsgDataReader)reader;
             try {
                 MsgReader.take(
                     _dataSeq, _infoSeq,
@@ -231,14 +248,18 @@ public class MsgSubscriber {
                     SampleStateKind.ANY_SAMPLE_STATE,
                     ViewStateKind.ANY_VIEW_STATE,
                     InstanceStateKind.ANY_INSTANCE_STATE);
-
+                
                 for(int i = 0; i < _dataSeq.size(); ++i) {
                     SampleInfo info = (SampleInfo)_infoSeq.get(i);
-
+                    
                     if (info.valid_data) {
-                        System.out.println(
-                            ((Msg)_dataSeq.get(i)).toString("Received",0));
-
+                    	double sourceTimestamp = info.source_timestamp.sec + info.source_timestamp.nanosec/1000000000.0; // get the timestamp from the source
+                    	
+                    	msgCounter.incrementCount();
+                    	
+                    	if (msgCounter.isLongerThanSecond(sourceTimestamp)) { //if the message is in the range we want.
+                    		System.out.println(((Msg)_dataSeq.get(i)).toString("Received Msg #" + msgCounter.getCount(), 0));
+                    	}                    	                        
                     }
                 }
             } catch (RETCODE_NO_DATA noData) {
@@ -246,7 +267,8 @@ public class MsgSubscriber {
             } finally {
                 MsgReader.return_loan(_dataSeq, _infoSeq);
             }
-        }
+        }      
     }
 }
+
 

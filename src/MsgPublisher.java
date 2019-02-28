@@ -1,4 +1,4 @@
-
+//Isaac Schultz 11583435
 
 /* MsgPublisher.java
 
@@ -101,7 +101,7 @@ public class MsgPublisher {
     }
 
     // An array of some fruits to be sent as messages.
-    public static String[] foods = {"Apple", "Spinach", "Carrots", "Lentil", "Banana", "Potato", "Pear", "Avocado", "Cherry", "Orange"};
+    public static String[] foods = {"Apple", "Spinach", "Carrots", "Lentil", "Banana", "Potato", "Pear", "Avocado", "Cherry", "Orange", "Burrito???"};
 
     // -----------------------------------------------------------------------
 
@@ -150,10 +150,7 @@ public class MsgPublisher {
             /* To customize topic QoS, use
             the configuration file USER_QOS_PROFILES.xml */
 
-            topic = participant.create_topic(
-                "Example Msg",
-                typeName, DomainParticipant.TOPIC_QOS_DEFAULT,
-                null /* listener */, StatusKind.STATUS_MASK_NONE);
+            topic = participant.create_topic("CS464 Project  1 Isaac Schultz", typeName, DomainParticipant.TOPIC_QOS_DEFAULT, null /* listener */, StatusKind.STATUS_MASK_NONE);
             if (topic == null) {
                 System.err.println("create_topic error\n");
                 return;
@@ -188,11 +185,11 @@ public class MsgPublisher {
             final long sendPeriodMillis = 250; // Project 1 specifies for the publisher to send a message every 250 ms
 
             for (int count = 0; (sampleCount == 0) || (count < sampleCount); ++count) {
-                System.out.println("Writing " + foods[count % 10] + count);
+                System.out.println("Writing " + foods[count % 10] +  " #" + count); //console message of what we are sending.
 
                 /* Modify the instance to be written here */
 
-                instance.message = foods[count % 10] + "!"; //use one of the 10 foods and send it with an explanation point!
+                instance.message = foods[count % 11] + "!"; //use one of the 10 foods and send it with an explanation point!
 
                 /* Write data */
                 writer.write(instance, instance_handle);
