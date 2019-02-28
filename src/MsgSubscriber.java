@@ -1,5 +1,4 @@
-
-
+// Isaac Schultz 11583435
 /* MsgSubscriber.java
 
 A publication of data of type Msg
