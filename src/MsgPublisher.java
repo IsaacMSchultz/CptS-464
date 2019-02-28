@@ -100,6 +100,9 @@ public class MsgPublisher {
         super();
     }
 
+    // An array of some fruits to be sent as messages.
+    public static String[] foods = {"Apple", "Spinach", "Carrots", "Lentil", "Banana", "Potato", "Pear", "Avocado", "Cherry", "Orange"};
+
     // -----------------------------------------------------------------------
 
     private static void publisherMain(int domainId, int sampleCount) {
@@ -174,6 +177,7 @@ public class MsgPublisher {
 
             /* Create data sample for writing */
             Msg instance = new Msg();
+            instance.sender = "Isaac Schultz";
 
             InstanceHandle_t instance_handle = InstanceHandle_t.HANDLE_NIL;
             /* For a data type that has a key, if the same instance is going to be
@@ -181,14 +185,14 @@ public class MsgPublisher {
             and register the keyed instance prior to writing */
             //instance_handle = writer.register_instance(instance);
 
-            final long sendPeriodMillis = 4 * 1000; // 4 seconds
+            final long sendPeriodMillis = 250; // Project 1 specifies for the publisher to send a message every 250 ms
 
-            for (int count = 0;
-            (sampleCount == 0) || (count < sampleCount);
-            ++count) {
-                System.out.println("Writing Msg, count " + count);
+            for (int count = 0; (sampleCount == 0) || (count < sampleCount); ++count) {
+                System.out.println("Writing " + foods[count % 10] + count);
 
                 /* Modify the instance to be written here */
+
+                instance.message = foods[count % 10] + "!"; //use one of the 10 foods and send it with an explanation point!
 
                 /* Write data */
                 writer.write(instance, instance_handle);
